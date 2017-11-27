@@ -10,12 +10,11 @@ public class VisualizationGenerator : MonoBehaviour {
 
 	public CameraController camControl;
 
-	public RectTransform YPosObject;
+	/*private RectTransform YPosObject;
 	private float startYpos;
 	private float currentYpos;
-	private string currentDate;
 	private RawImage currentLineVertical;
-	private RectTransform thisRect;
+
 
 	public RawImage lineVerticalTemplate;
 	public RawImage lineHorizontalTemplate;
@@ -26,20 +25,34 @@ public class VisualizationGenerator : MonoBehaviour {
 	public RawImage takenPicture;
 	private float smallGap;
 	private float largeGap;
-	public GameObject renderVis;
-	private RectTransform renderVisRect;
-	private Text currentDateObj;
+	*/
+
+	public GameObject visController;
+	public GameObject visTemplate;
+	public GameObject dateTemplate;
+
+	private RectTransform thisRect;
+
+	private Transform bg;
+	private Transform lineVertical;
+	private Transform lineHorizontal;
+	private Transform timeText;
+	private Transform visitorText;
+	private Transform image;
+
+	private GameObject dateBox;
+
+	private string currentDate;
+	bool needsDate;
 
 
 	// Use this for initialization
 	void Start () {
-		startYpos = YPosObject.anchoredPosition.y;
-		currentYpos = YPosObject.anchoredPosition.y;
-		smallGap = 40f;
-		largeGap = 120f;
+		needsDate = true;
+		//smallGap = 40f;
+		//largeGap = 120f;
 		currentDate = "";
 		thisRect = gameObject.GetComponent<RectTransform> ();
-		renderVisRect = renderVis.GetComponent<RectTransform>();
 		GenerateVisualization ();
 	}
 		
@@ -48,8 +61,10 @@ public class VisualizationGenerator : MonoBehaviour {
 		GuestEntryData guestData;// = new GuestEntryData();
 		//guestData.init ();
 		//dataManager.SaveData (guestData);
-		guestData = dataManager.LoadData();
+		dataManager.LoadData();
 
+		guestData = dataManager.LocalCopyOfData;
+		Debug.Log (guestData.guestID.Count);
 		for (int i = 0; i < guestData.guestID.Count; i++) {			
 			Texture2D snap = null;
 			if (guestData.guestAvatar [i] != null) {
@@ -61,90 +76,115 @@ public class VisualizationGenerator : MonoBehaviour {
 	}
 
 	public void AddEntry(Texture2D snap, string text, string date, string time) {
+		GameObject vis = Instantiate (visTemplate, visController.transform);
+		RectTransform visRect = vis.GetComponent<RectTransform> ();
+		visRect.SetAsFirstSibling ();
 
+		// grow the scrollable rect to make space
+		float rectGrowth = 300f;
+
+		// if the date doesn't match, use the beginVisTemplate
+		if (currentDate != date) {
+			dateBox = Instantiate (dateTemplate, visController.transform);
+			Transform dateObj = dateBox.transform.GetChild (1);
+			dateObj.GetComponent<Text> ().text = date;
+			currentDate = date;
+
+			// grow the scrollable rect to make space for the date header
+			rectGrowth += 50f;
+
+		}
+
+		// make sure date is on top
+		RectTransform dateBoxRect = dateBox.GetComponent<RectTransform> ();
+		dateBoxRect.SetAsFirstSibling ();
+
+		// get children of the vis
+		bg = vis.transform.GetChild (0);
+		lineVertical = vis.transform.GetChild (1);
+		lineHorizontal = vis.transform.GetChild (2);
+		timeText = vis.transform.GetChild (3);
+		visitorText = vis.transform.GetChild (4);
+		image = vis.transform.GetChild (5);
+
+		timeText.GetComponent<Text> ().text = time;
+		visitorText.GetComponent<Text> ().text = text;
+
+		// Create visitor image
+		if (snap != null) {
+			image.GetComponent<RawImage> ().texture = snap;
+		}
+
+		//currentYpos = -smallGap;
 		// expand the Visualization rect to make room for more visualizations
 		float thisRectSizeDeltaX = thisRect.sizeDelta.x;
 		float thisRectSizeDeltaY = thisRect.sizeDelta.y;
-		thisRect.sizeDelta = new Vector2 (thisRectSizeDeltaX, thisRectSizeDeltaY+240f);
+		thisRect.sizeDelta = new Vector2 (thisRectSizeDeltaX, thisRectSizeDeltaY + rectGrowth);
+
+	}
+	/*
+		/// __----
+
+
 
 		// if the date doesn't match, Create a date header
-		if (currentDate != date) {
-			currentDateObj = Instantiate (dateTextTemplate, renderVis.transform);
-			currentDateObj.GetComponent<Text> ().text = date;
-		}
+			currentDateObj = Instantiate (dateTextTemplate, vis.transform);
 
-		// update the date header position to currentYPos
-		float currentDateObjanchorPosX = currentDateObj.rectTransform.anchoredPosition.x;
-		currentDateObj.rectTransform.anchoredPosition = new Vector2 (currentDateObjanchorPosX, currentYpos);
+			// update the date header position to currentYPos
+			float currentDateObjanchorPosX = currentDateObj.rectTransform.anchoredPosition.x;
+			currentDateObj.rectTransform.anchoredPosition = new Vector2 (currentDateObjanchorPosX, currentYpos);
 
 		currentYpos -= smallGap;
+
+		currentLineVertical = Instantiate (lineVerticalTemplate, vis.transform);
+		float curLineVerSizeDeltaX = currentLineVertical.rectTransform.sizeDelta.x;
+		currentLineVertical.rectTransform.sizeDelta = new Vector2 (curLineVerSizeDeltaX, 240f);
+		float curLineVerRectPosX = currentLineVertical.rectTransform.anchoredPosition.x;
+		currentLineVertical.rectTransform.anchoredPosition = new Vector2 (curLineVerRectPosX, currentYpos);
+
 		currentYpos -= largeGap;
 
 		// Create time text
-		Text currentTimeText = Instantiate (timeTextTemplate, renderVis.transform);
-		currentTimeText.GetComponent<Text> ().text = time;
+		Text currentTimeText = Instantiate (timeTextTemplate, vis.transform);
+
 		float curTimeTextRectPosX = currentTimeText.rectTransform.anchoredPosition.x;
 		currentTimeText.rectTransform.anchoredPosition = new Vector2 (curTimeTextRectPosX, currentYpos);
 
 		// Create horizontal line
-		RawImage currentLineHorizontal = Instantiate (lineHorizontalTemplate, renderVis.transform);
+		RawImage currentLineHorizontal = Instantiate (lineHorizontalTemplate, vis.transform);
 		float curLineHorRectPosX = currentLineHorizontal.rectTransform.anchoredPosition.x;
 		currentLineHorizontal.rectTransform.anchoredPosition = new Vector2(curLineHorRectPosX, currentYpos);
 
-		RawImage currentImage = Instantiate (imageTemplate, renderVis.transform);
+		RawImage currentImage = Instantiate (imageTemplate, vis.transform);
 		float curImgRectPosX = currentImage.rectTransform.anchoredPosition.x;
 		currentImage.rectTransform.anchoredPosition = new Vector2 (curImgRectPosX, currentYpos);
 
-		// Create visitor image
-		if (snap != null) {
-			currentImage.texture = snap;
-		}
+
 
 		// Create visitor text
-		Text visitorText = Instantiate (visitorTextTemplate, renderVis.transform);
-		visitorText.GetComponent<Text> ().text = text;
+		Text visitorText = Instantiate (visitorTextTemplate, vis.transform);
+
 		float visitorTextRectPosX = visitorText.rectTransform.anchoredPosition.x;
 		visitorText.rectTransform.anchoredPosition = new Vector2 (visitorTextRectPosX, currentYpos);
 
 		currentYpos -= largeGap;
 
-		if (currentDate != date) {
-			// instantiate a new timeline line
-			// set the timeline line as current timeline line
-			// Create vertical line
-			currentLineVertical = Instantiate (lineVerticalTemplate, renderVis.transform);
-			float curLineVerSizeDeltaX = currentLineVertical.rectTransform.sizeDelta.x;
-			currentLineVertical.rectTransform.sizeDelta = new Vector2 (curLineVerSizeDeltaX, 240f);
-			float curLineVerRectPosX = currentLineVertical.rectTransform.anchoredPosition.x;
-			currentLineVertical.rectTransform.anchoredPosition = new Vector2 (curLineVerRectPosX, currentYpos);
-		} else {
-			// if it's the same date, simply grow the existing timeline line
-			float curLineVerSizeDeltaX = currentLineVertical.rectTransform.sizeDelta.x;
-			float curLineVerSizeDeltaY = currentLineVertical.rectTransform.sizeDelta.y;
-			currentLineVertical.rectTransform.sizeDelta = new Vector2 (curLineVerSizeDeltaX, curLineVerSizeDeltaY + 320f);
-		}
-
-		currentYpos = startYpos;
-
 		// move RenderedVis downwards
-		float renderVisPosX = renderVisRect.anchoredPosition.x;
-		float renderVisPosY = renderVisRect.anchoredPosition.y;
-		renderVisRect.anchoredPosition = new Vector2(renderVisPosX, renderVisPosY-320f);
-		float renderVisSizeDeltaX = renderVisRect.sizeDelta.x;
-		float renderVisSizeDeltaY = renderVisRect.sizeDelta.y;
-		renderVisRect.sizeDelta = new Vector2 (renderVisSizeDeltaX, renderVisSizeDeltaY+320f);
-		/*currentYpos = YPosObject.anchoredPosition.y;
+		//float renderVisPosX = renderVisRect.anchoredPosition.x;
+		//float renderVisPosY = renderVisRect.anchoredPosition.y;
+		//renderVisRect.anchoredPosition = new Vector2(renderVisPosX, renderVisPosY-320f);
+		//float renderVisSizeDeltaX = renderVisRect.sizeDelta.x;
+		//float renderVisSizeDeltaY = renderVisRect.sizeDelta.y;
+		//renderVisRect.sizeDelta = new Vector2 (renderVisSizeDeltaX, renderVisSizeDeltaY+320f);
+		currentYpos = YPosObject.anchoredPosition.y;
 		currentYpos += largeGap;
 		currentYpos += smallGap;
 		currentYpos += largeGap;
 		currentYpos += largeGap;
 		currentYpos += largeGap;
-		currentYpos += smallGap;*/
+		currentYpos += smallGap;
 
-		// update date
-		currentDate = date;
-
-	}
+	}*/
 		
 	// Update is called once per frame
 	void Update () {

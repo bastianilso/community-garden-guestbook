@@ -13,7 +13,13 @@ public class submitGuestData : MonoBehaviour {
 	public GuestEntryData guestData;
 
 	public void sendData() {
-		guestData = dataManager.LoadData ();
+
+		if (dataManager.LocalCopyOfData == null) {
+			dataManager.LoadData ();
+		}
+
+		guestData = dataManager.LocalCopyOfData;
+
 		System.DateTime.Now.ToString("MMMM");
 		string currentDate = System.DateTime.Now.ToString("dd");
 		currentDate += GetDaySuffix (System.DateTime.Now.Day);
@@ -27,6 +33,7 @@ public class submitGuestData : MonoBehaviour {
 		}
 
 		visGen.AddEntry(camControl.snapshot, inputField.text, currentDate, currentTime);
+		// call SaveData
 		dataManager.SaveData (guestData);
 
 		// reset guestbook
@@ -34,10 +41,6 @@ public class submitGuestData : MonoBehaviour {
 		pictureAvatar.texture = null;
 		camControl.snapshot = null;
 		camControl.pictureTaken = false;
-		pictureAvatar.enabled = false;
-		// visGen.GenerateVisualization(); or maybe updateVisualization?
-		// prepare everything in a GuestEntryData struct
-		// call SaveData
 	}
 
 	// Use this for initialization

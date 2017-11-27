@@ -15,6 +15,7 @@ public class CameraController : MonoBehaviour
 	public RawImage background; // fallback background
 	public AspectRatioFitter fit;
 	// Use this for initialization
+
 	void Start ()
 	{
 		//guestData = dataManager.LoadData ();
@@ -24,7 +25,6 @@ public class CameraController : MonoBehaviour
 	//	} else {
 	//		currentID = 1;
 	//	}
-			
 		defaultBackground = background.texture;
 		snapshot = null;
 		WebCamDevice[] devices = WebCamTexture.devices; // an array of our webcam devices
@@ -34,7 +34,7 @@ public class CameraController : MonoBehaviour
 			camAvailable = false;
 			return;
 		}
-			
+
 		for(int i = 0; i < devices.Length; i++)
 		{
 			if (devices[i].isFrontFacing)
@@ -49,12 +49,15 @@ public class CameraController : MonoBehaviour
 			return;
 		}
 
+		snapshot = null;
 		frontCam.Play();
+
+
 		background.texture = frontCam;
 		background.color = new Color (1f, 1f, 1f, 1f);
 
-		camAvailable = true;	 //false; //true;
 		pictureTaken = false;
+		camAvailable = true;
 	}
 
 	// Update is called once per frame
@@ -82,12 +85,12 @@ public class CameraController : MonoBehaviour
 	public void takePicture ()
 	{
 		if (camAvailable) {
-			frontCam.Pause ();
+			//frontCam.Pause ();
 			snapshot = new Texture2D (frontCam.width, frontCam.height);
 			snapshot.SetPixels (frontCam.GetPixels ());
 			snapshot.Apply ();
 			RawImage rawAvatar = pictureAvatar.GetComponent<RawImage> ();
-			rawAvatar.texture = frontCam;
+			rawAvatar.texture = snapshot;
 			//guestData.guestAvatar.Add(snap.EncodeToPNG());
 		} 
 

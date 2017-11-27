@@ -26,7 +26,7 @@ public class GuestEntryData
 
 public class LoadSaveData : MonoBehaviour {
 
-	public GuestEntryData LocalCopyOfData;
+	public GuestEntryData LocalCopyOfData = null;
 	public CameraController cameraController;
 	public bool IsSceneBeingLoaded = false;
 
@@ -46,7 +46,7 @@ public class LoadSaveData : MonoBehaviour {
 		saveFile.Close();
 	}
 
-	public GuestEntryData LoadData()
+	public void LoadData()
 	{
 		//if (!Directory.Exists ("Saves")) {
 		//	Directory.CreateDirectory ("Saves");
@@ -64,13 +64,12 @@ public class LoadSaveData : MonoBehaviour {
 		catch (System.Exception e) {
 			LocalCopyOfData = new GuestEntryData { };
 			LocalCopyOfData.init ();
-			return LocalCopyOfData;
+			return;
 		}
 		finally {
 			saveFile.Close ();
 		}
-
-		return LocalCopyOfData;
+		return;
 	}
 
 	// Use this for initialization
