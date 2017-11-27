@@ -11,6 +11,7 @@ public class CameraController : MonoBehaviour
 	private Texture defaultBackground;
 	public Texture2D snapshot;
 	public GameObject pictureAvatar;
+	public GameObject WebcamCanvas;
 
 	public RawImage background; // fallback background
 	public AspectRatioFitter fit;
@@ -71,6 +72,10 @@ public class CameraController : MonoBehaviour
 			return;
 		}
 
+		if (Input.GetKeyUp(KeyCode.Escape)) {
+			WebcamCanvas.SetActive(false);
+		}
+
 		float ratio = (float)frontCam.width / (float)frontCam.height;
 		fit.aspectRatio = ratio;
 
@@ -96,5 +101,9 @@ public class CameraController : MonoBehaviour
 
 		pictureTaken = true;
 		// TODO: save picture
+	}
+
+	public void removePicture () {
+		snapshot = null;
 	}
 }

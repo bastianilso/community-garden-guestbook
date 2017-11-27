@@ -9,14 +9,12 @@ using UnityEngine.UI;
 public class GuestEntryData
 {
 	public List<byte[]> guestAvatar;
-	public List<int> guestID;
 	public List<string> date;
 	public List<string> time;
 	public List<string> text;
 
 	public void init() {
 		guestAvatar = new List<byte[]> ();
-		guestID = new List<int> ();
 		date = new List<string> ();
 		time = new List<string> ();
 		text = new List<string> ();

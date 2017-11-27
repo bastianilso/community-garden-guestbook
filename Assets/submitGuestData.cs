@@ -14,6 +14,10 @@ public class submitGuestData : MonoBehaviour {
 
 	public void sendData() {
 
+		if (inputField.text == "" && camControl.snapshot != null) {
+			return;
+		}
+
 		if (dataManager.LocalCopyOfData == null) {
 			dataManager.LoadData ();
 		}
@@ -24,10 +28,11 @@ public class submitGuestData : MonoBehaviour {
 		string currentDate = System.DateTime.Now.ToString("dd");
 		currentDate += GetDaySuffix (System.DateTime.Now.Day);
 		currentDate += " " + System.DateTime.Now.ToString("MMMM");
-		string currentTime = System.DateTime.Now.ToString("HH:mm");
+		string currentTime = System.DateTime.Now.ToString("hh:mm tt");
 		guestData.time.Add(currentTime);
 		guestData.date.Add (currentDate);
 		guestData.text.Add (inputField.text);
+
 		if (camControl.snapshot != null) {
 			guestData.guestAvatar.Add (camControl.snapshot.EncodeToPNG ());
 		}

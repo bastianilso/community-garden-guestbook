@@ -30,6 +30,8 @@ public class VisualizationGenerator : MonoBehaviour {
 	public GameObject visController;
 	public GameObject visTemplate;
 	public GameObject dateTemplate;
+	public GameObject visTextOnlyTemplate;
+	public GameObject sensorTemplate;
 
 	private RectTransform thisRect;
 
@@ -39,10 +41,13 @@ public class VisualizationGenerator : MonoBehaviour {
 	private Transform timeText;
 	private Transform visitorText;
 	private Transform image;
+	private Transform visitorCount;
 
 	private GameObject dateBox;
 
+	private int entryCount;
 	private string currentDate;
+	private string currentTime;
 	bool needsDate;
 
 
@@ -52,6 +57,8 @@ public class VisualizationGenerator : MonoBehaviour {
 		//smallGap = 40f;
 		//largeGap = 120f;
 		currentDate = "";
+		currentTime = "";
+		entryCount = 0;
 		thisRect = gameObject.GetComponent<RectTransform> ();
 		GenerateVisualization ();
 	}
@@ -62,12 +69,10 @@ public class VisualizationGenerator : MonoBehaviour {
 		//guestData.init ();
 		//dataManager.SaveData (guestData);
 		dataManager.LoadData();
-
 		guestData = dataManager.LocalCopyOfData;
-		Debug.Log (guestData.guestID.Count);
-		for (int i = 0; i < guestData.guestID.Count; i++) {			
+		for (int i = 0; i < guestData.time.Count; i++) {			
 			Texture2D snap = null;
-			if (guestData.guestAvatar [i] != null) {
+			if (i < guestData.guestAvatar.Count) {
 				snap = new Texture2D (camControl.frontCam.width, camControl.frontCam.height);
 				snap.LoadImage (guestData.guestAvatar [i]);
 			}
@@ -76,7 +81,14 @@ public class VisualizationGenerator : MonoBehaviour {
 	}
 
 	public void AddEntry(Texture2D snap, string text, string date, string time) {
-		GameObject vis = Instantiate (visTemplate, visController.transform);
+		entryCount += 1;
+		GameObject vis = null;
+
+		if (snap != null) {
+			vis = Instantiate (visTemplate, visController.transform);
+		} else {
+			vis = Instantiate (visTextOnlyTemplate, visController.transform);
+		}
 		RectTransform visRect = vis.GetComponent<RectTransform> ();
 		visRect.SetAsFirstSibling ();
 
@@ -100,19 +112,26 @@ public class VisualizationGenerator : MonoBehaviour {
 		dateBoxRect.SetAsFirstSibling ();
 
 		// get children of the vis
-		bg = vis.transform.GetChild (0);
-		lineVertical = vis.transform.GetChild (1);
-		lineHorizontal = vis.transform.GetChild (2);
+		//bg = vis.transform.GetChild (0);
+		//lineVertical = vis.transform.GetChild (1);
+		//lineHorizontal = vis.transform.GetChild (2);
 		timeText = vis.transform.GetChild (3);
 		visitorText = vis.transform.GetChild (4);
-		image = vis.transform.GetChild (5);
+		if (currentTime == time) {
+			timeText.GetComponent<Text> ().text = "";
+		} else {
+			timeText.GetComponent<Text> ().text = time;
+		}
 
-		timeText.GetComponent<Text> ().text = time;
 		visitorText.GetComponent<Text> ().text = text;
 
 		// Create visitor image
 		if (snap != null) {
+			image = vis.transform.GetChild (5);
 			image.GetComponent<RawImage> ().texture = snap;
+		} else {
+			visitorCount = vis.transform.GetChild (5);
+			visitorCount.GetComponent<Text> ().text = "Visitor " + entryCount.ToString();
 		}
 
 		//currentYpos = -smallGap;

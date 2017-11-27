@@ -46,7 +46,7 @@ public class SensorInfoGrabber : MonoBehaviour {
 			string currentDate = System.DateTime.Now.ToString("dd");
 			currentDate += GetDaySuffix (System.DateTime.Now.Day);
 			currentDate += " " + System.DateTime.Now.ToString("MMMM");
-			string currentTime = System.DateTime.Now.ToString("HH:mm");
+			string currentTime = System.DateTime.Now.ToString("hh:mm tt");
 			guestData.guestAvatar.Add (	new byte[] { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 });
 			guestData.time.Add(currentTime);
 			guestData.date.Add (currentDate);
