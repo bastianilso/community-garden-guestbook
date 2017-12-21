@@ -72,28 +72,33 @@ public class VisualizationGenerator : MonoBehaviour {
 		guestData = dataManager.LocalCopyOfData;
 		for (int i = 0; i < guestData.time.Count; i++) {			
 			Texture2D snap = null;
-			if (i < guestData.guestAvatar.Count) {
+			if (guestData.guestAvatar[i] != null && guestData.guestAvatar[i].Length > 0) {
 				snap = new Texture2D (camControl.frontCam.width, camControl.frontCam.height);
 				snap.LoadImage (guestData.guestAvatar [i]);
 			}
-			AddEntry (snap, guestData.text[i], guestData.date[i], guestData.time[i]);
+
+			AddEntry (snap, guestData.text[i], guestData.date[i], guestData.time[i], guestData.count[i]);
 		}
 	}
 
-	public void AddEntry(Texture2D snap, string text, string date, string time) {
-		entryCount += 1;
+	public void AddEntry(Texture2D snap, string text, string date, string time, int count) {
 		GameObject vis = null;
-
-		if (snap != null) {
+		float rectGrowth = 0f;
+		//Debug.Log("snap : " + snap + ", text: " + text + ", date: " + date + ", time: " + time + ", count: " + count.ToString());
+		if (snap != null) { // use avatar based vistemplate
 			vis = Instantiate (visTemplate, visController.transform);
-		} else {
+			rectGrowth = 300f;
+		} else if (text != "")  { // use text only template for comments
 			vis = Instantiate (visTextOnlyTemplate, visController.transform);
+			rectGrowth = 300f;
+		} else  { // use sensor template with only date and time info
+			vis = Instantiate (sensorTemplate, visController.transform);
+			rectGrowth = 60f;
 		}
 		RectTransform visRect = vis.GetComponent<RectTransform> ();
 		visRect.SetAsFirstSibling ();
 
 		// grow the scrollable rect to make space
-		float rectGrowth = 300f;
 
 		// if the date doesn't match, use the beginVisTemplate
 		if (currentDate != date) {
@@ -103,7 +108,7 @@ public class VisualizationGenerator : MonoBehaviour {
 			currentDate = date;
 
 			// grow the scrollable rect to make space for the date header
-			rectGrowth += 50f;
+			rectGrowth += 80f;
 
 		}
 
@@ -116,21 +121,34 @@ public class VisualizationGenerator : MonoBehaviour {
 		//lineVertical = vis.transform.GetChild (1);
 		//lineHorizontal = vis.transform.GetChild (2);
 		timeText = vis.transform.GetChild (3);
-		visitorText = vis.transform.GetChild (4);
 		if (currentTime == time) {
 			timeText.GetComponent<Text> ().text = "";
 		} else {
 			timeText.GetComponent<Text> ().text = time;
 		}
 
-		visitorText.GetComponent<Text> ().text = text;
+		visitorText = vis.transform.GetChild (4);
+		if (text != "") {
+			visitorText.GetComponent<Text> ().text = text;
+		}
+
+		if (count > 0) {
+			visitorText.GetComponent<Text> ().text = count.ToString () + " visitors";
+			entryCount += count;
+		} else {
+			entryCount += 1;
+		}
+
 
 		// Create visitor image
 		if (snap != null) {
 			image = vis.transform.GetChild (5);
 			image.GetComponent<RawImage> ().texture = snap;
-		} else {
-			visitorCount = vis.transform.GetChild (5);
+			if (text != "") {
+				visitorText.GetComponent<Text> ().text = text;
+			}
+		} else if (text != "" && entryCount > 0) { // text only comment, add a visitor count thingy to it.
+			visitorCount = vis.transform.GetChild (4);
 			visitorCount.GetComponent<Text> ().text = "Visitor " + entryCount.ToString();
 		}
 

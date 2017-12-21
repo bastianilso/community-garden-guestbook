@@ -12,12 +12,14 @@ public class GuestEntryData
 	public List<string> date;
 	public List<string> time;
 	public List<string> text;
+	public List<int> count;
 
 	public void init() {
 		guestAvatar = new List<byte[]> ();
 		date = new List<string> ();
 		time = new List<string> ();
 		text = new List<string> ();
+		count = new List<int> ();
 	}
 
 }
@@ -46,6 +48,7 @@ public class LoadSaveData : MonoBehaviour {
 
 	public void LoadData()
 	{
+
 		//if (!Directory.Exists ("Saves")) {
 		//	Directory.CreateDirectory ("Saves");
 		//}

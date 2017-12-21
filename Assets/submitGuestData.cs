@@ -14,7 +14,7 @@ public class submitGuestData : MonoBehaviour {
 
 	public void sendData() {
 
-		if (inputField.text == "" && camControl.snapshot != null) {
+		if (inputField.text == "" && camControl.snapshot == null) {
 			return;
 		}
 
@@ -32,12 +32,15 @@ public class submitGuestData : MonoBehaviour {
 		guestData.time.Add(currentTime);
 		guestData.date.Add (currentDate);
 		guestData.text.Add (inputField.text);
+		guestData.count.Add (0);
 
 		if (camControl.snapshot != null) {
 			guestData.guestAvatar.Add (camControl.snapshot.EncodeToPNG ());
+		} else {
+			guestData.guestAvatar.Add (new byte[] {  });
 		}
 
-		visGen.AddEntry(camControl.snapshot, inputField.text, currentDate, currentTime);
+		visGen.AddEntry(camControl.snapshot, inputField.text, currentDate, currentTime, 0);
 		// call SaveData
 		dataManager.SaveData (guestData);
 
